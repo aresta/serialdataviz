@@ -2,7 +2,7 @@ import serial
 from PyQt6 import QtCore, QtWidgets
 
 class Serial_data_worker(QtCore.QThread):
-    data_received = QtCore.pyqtSignal(int)
+    data_received = QtCore.pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -19,12 +19,7 @@ class Serial_data_worker(QtCore.QThread):
                 if self.serial.in_waiting > 0:
                     str = self.serial.readline().strip().decode('utf-8')
                     if not str: continue
-                    try:
-                        data = int(str)
-                    except:
-                        print("err: ", str)
-                        continue
-                    self.data_received.emit(data)
+                    self.data_received.emit( str)
         except serial.SerialException as e: print(e)
         except serial.SerialTimeoutException as e: print(e)
         except IOError as e: print(e)

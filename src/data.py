@@ -1,25 +1,41 @@
 from dataclasses import dataclass
 from random import randrange
+from src.datastructs import Gui, Data
 from src.gui import update_plot
 
-@dataclass
-class Data:
-    time: list = None
-    val: list = None
+
 
 #  = list( range(50))
 #  = [randrange(1, 100) for _ in range(50)]
 
-def process_data( line, data, gui, conf):
-    if not data.val: data.val = []
-    if not data.time: data.time = [] 
-    if len( data.val) > conf['buffer_size']: del data.val[0]
-    if len( data.time) > conf['buffer_size']: del data.time[0]
-    # delta = randrange( -10, 15) if data[-1] < 50 else randrange( -15, 10)
-    # data.append( data[-1] + delta)
-    data.val.append( line)
-    if not data.time: 
-        data.time = [1]
+def process_data( line:str, data:Data, gui:Gui, conf):
+    line = line.strip()
+    if ',' in line:
+        line_vars = line.split(',')
+    elif ' ' in line:
+        line_vars = line.split(' ')
+    else: return
+    
+    try:
+        line_vars = [ float(v) for v in line_vars]
+    except Exception as e:
+        print("Error: ", e)
+        print("line_Vars:", line_vars)
+        return
+
+    if not data.vars: 
+        data.vars = [[var] for var in line_vars]
+        data.time = [0]
+        data.vars_num = len( line_vars)
     else:
+        i = 0
+        for line_var in line_vars:
+            data.vars[i].append( line_var)
+            i +=1
         data.time.append( data.time[-1] + 1)
+
+    if len( data.time) > conf['buffer_size']: 
+        for var in data.vars: del var[0]
+        del data.time[0]
+
     update_plot( data, gui)
