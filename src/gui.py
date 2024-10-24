@@ -10,7 +10,7 @@ import serial.tools.list_ports
 
 
 
-def init_app( conf):
+def init_app( conf) -> Gui:
     gui = Gui()
     gui.window = QMainWindow()
     gui.window.setWindowTitle('SerialDataViz')
@@ -71,11 +71,11 @@ def update_plot( data:Data, gui:Gui):
             i += 1
     if gui.autoscroll.isChecked():
         if len( data.time) > gui.x_range:
-            gui.plot_widget.setXRange( data.time[ -gui.x_range], data.time[-1])
-        gui.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
+            gui.plot_widget.setXRange( data.time[-1] - gui.x_range, data.time[-1])
+        gui.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True) #FIX move to event
         
     else:
         gui.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
-        # gui.plot_widget.getPlotItem().getViewBox().setMouseMode( pg.ViewBox.RectMode)
+        gui.x_range = gui.plot_widget.viewRect().width() #FIX move to event
 
 

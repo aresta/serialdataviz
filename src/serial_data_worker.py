@@ -44,7 +44,7 @@ class Serial_data_worker(QtCore.QThread):
         gui.start_button.setEnabled( True)
 
 
-def init_worker():
+def init_worker() -> Serial_data_worker:
     worker = Serial_data_worker()
     return worker
 
