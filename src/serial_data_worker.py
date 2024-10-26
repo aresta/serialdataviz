@@ -23,7 +23,6 @@ class Serial_data_worker(QtCore.QThread):
                     self.data_received.emit( str)
         except serial.SerialException as e: print(e)
         except serial.SerialTimeoutException as e: print(e)
-        except IOError as e: print(e)
         except Exception as e: print(e)
         finally:
             self.worker_stop

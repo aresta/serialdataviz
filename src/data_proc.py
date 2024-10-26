@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from src.data import Gui, Data, Var
 from src.gui import update_plot
+import time
 
-
+prev_time: float = 0
 def process_data( line:str, data:Data, gui:Gui, conf):
+    global prev_time
     line = line.strip()
     if ',' in line:
         line_vars = line.split(',')
@@ -35,8 +37,11 @@ def process_data( line:str, data:Data, gui:Gui, conf):
             var.vals.append( line_var)
         data.time.append( data.time[-1] + 1)
 
-    if len( data.time) > conf['buffer_size']: 
+    while len( data.time) > conf['buffer_size']: 
         for var in data.vars: del var.vals[0]
         del data.time[0]
 
-    update_plot( data, gui)
+    now = time.time()
+    if now-prev_time > 0.020: # only update max every some ms
+        prev_time = now
+        update_plot( data, gui)

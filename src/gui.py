@@ -64,7 +64,9 @@ def init_app( conf) -> tuple[ QMainWindow, Gui]:
     main_layout.addWidget( gui.plot_widget)
     return window, gui
 
+
 def update_plot( data:Data, gui:Gui):
+    global prev_time
     if not gui.plot_data_items:
         gui.plot_data_items = []
         gui.legend = gui.plot_widget.getPlotItem().addLegend(offset=(-30,30))
@@ -88,7 +90,7 @@ def update_plot( data:Data, gui:Gui):
     else:
         for data_item, var in zip( gui.plot_data_items, data.vars):
             if var.is_visible:
-                data_item.setData( var.vals)
+                data_item.setData( data.time, var.vals)
     if gui.autoscroll.isChecked():
         if len( data.time) > gui.x_range: #FIX data range vs pixels
             gui.plot_widget.setXRange( data.time[-1] - gui.x_range, data.time[-1])
