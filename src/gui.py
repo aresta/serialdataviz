@@ -1,6 +1,7 @@
 import PyQt6.QtWidgets as Qtw
 import pyqtgraph as pg
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPen
 import serial
 import serial.tools.list_ports
 
@@ -23,13 +24,32 @@ class Gui:
         top_layout.addWidget( self.stop_button)
 
         self.autoscroll_chekbox = Qtw.QCheckBox("Autoscroll")
-        self.autoscroll_chekbox.setCheckState( Qt.CheckState.Checked)
+        self.autoscroll_chekbox.setChecked( True)
         top_layout.addWidget( self.autoscroll_chekbox)
         self.autoscroll_chekbox.setEnabled( False)
         
         self.legend_checkbox = Qtw.QCheckBox("Legend")
         self.legend_checkbox.setEnabled( False)
         top_layout.addWidget( self.legend_checkbox)
+        
+        self.cursors_checkbox = Qtw.QCheckBox("Cursors")
+        self.cursors_checkbox.setChecked( False)
+        self.cursors_checkbox.setEnabled( False)
+        top_layout.addWidget( self.cursors_checkbox)
+        cursor_pen = QPen( pg.mkColor("#EBB"))
+        cursor_pen.setStyle( Qt.PenStyle.DotLine)
+        cursor_pen.setWidth( 4)
+        cursor_pen.setCosmetic( True)
+        cursor_penh = QPen( cursor_pen)
+        cursor_penh.setColor( pg.mkColor("#E88"))
+        print( "cursor_pen", cursor_pen)
+        self.cursors = pg.LinearRegionItem(
+            pen = cursor_pen,
+            hoverPen = cursor_penh,
+            brush = pg.mkBrush( pg.mkColor("#CCCCFF22")), 
+            hoverBrush = pg.mkBrush( pg.mkColor("#CCCCFF55")))
+        self.cursors.setZValue(-10)
+        self.cursors.hide()
 
         top_layout.addStretch() # push elements to the sides
 
@@ -63,6 +83,8 @@ class Gui:
 
         # plot_data_items
         self.plot_data_items = []
+
+        self.plot_widget.addItem( self.cursors)
 
         # main layout    
         main_layout.addLayout( top_layout)

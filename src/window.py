@@ -39,6 +39,17 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.autoscroll_chekbox.clicked.connect( 
             lambda: self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=(not self.autoscroll_chekbox.isChecked()), y=True))
         self.settings_button.clicked.connect( self.settings_button_clicked)
+        self.cursors_checkbox.clicked.connect( self.add_cursors) 
+
+
+    def add_cursors( self):
+        if self.cursors_checkbox.isChecked():
+            self.cursors.setRegion([ 
+                self.plot_widget.visibleRange().center().x() - self.plot_widget.visibleRange().width()/8,
+                self.plot_widget.visibleRange().center().x() + self.plot_widget.visibleRange().width()/8 ])
+            self.cursors.show()
+        else:
+            self.cursors.hide()
 
 
     def worker_start( self):
@@ -46,12 +57,14 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.start_button.setEnabled( False)
         self.port_dropdown.setEnabled( False)
         self.baudrate_dropdown.setEnabled( False)
+        self.cursors_checkbox.setChecked( False)
+        self.cursors_checkbox.setEnabled( False)
         self.serial_worker.baudrate = int( self.baudrate_dropdown.currentText())
         self.serial_worker.serial_port = self.port_dropdown.currentText()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
         self.worker_thread.start()
         self.timer.timeout.connect( self.update_plot2)
-        self.timer.start( 25)
+        self.timer.start(25)
 
 
     def worker_stop( self):
@@ -62,7 +75,9 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.start_button.setEnabled( True)
         self.port_dropdown.setEnabled( True)
         self.baudrate_dropdown.setEnabled( True)
+        self.cursors_checkbox.setEnabled( True)
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
+        self.timer.stop()
         
 
     def update_plot2( self):
@@ -92,10 +107,10 @@ class MainWindow( Qtw.QMainWindow, Gui):
             self.legend_checkbox.setEnabled( True)
                 
             if len( self.data.vars) > 1:
-                self.legend_checkbox.setCheckState( Qt.CheckState.Checked)
+                self.legend_checkbox.setChecked( True)
                 self.legend.show()
             else:
-                self.legend_checkbox.setCheckState( Qt.CheckState.Unchecked)
+                self.legend_checkbox.setChecked( False)
                 self.legend.hide()
             self.autoscroll_chekbox.setEnabled( True)
         else:
