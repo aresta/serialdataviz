@@ -18,6 +18,7 @@ class Serial_data_worker( QObject):
         try:
             self.serial = serial.Serial(self.serial_port, self.baudrate, timeout=2)
             self.running = True
+            self.serial.reset_input_buffer()
             while self.running:
                 if self.serial.in_waiting > 0:
                     str = self.serial.read_until( size=128).strip().decode('utf-8')
@@ -28,6 +29,7 @@ class Serial_data_worker( QObject):
         except Exception as e: print(e)
         finally:
             if self.serial and self.serial.is_open: 
+                self.serial.reset_input_buffer()
                 self.serial.close()
 
 

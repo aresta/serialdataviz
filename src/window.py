@@ -1,20 +1,27 @@
 import PyQt6.QtWidgets as Qtw
-from PyQt6.QtCore import Qt, QThread
+from PyQt6.QtCore import Qt, QThread, QTimer
 import pyqtgraph as pg
 from src.data import Data, Var
 from src.gui import Gui
-from src.data_proc import DataProc
+from src.dataproc import process_data
 from src.serial_data_worker import Serial_data_worker
 
 
-class MainWindow( Qtw.QMainWindow, DataProc, Gui):
+class MainWindow( Qtw.QMainWindow, Gui):
     def __init__(self, conf, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conf = conf
         self.data = Data()
+        self.timer = QTimer( self)
         self.init_gui()
         self.init_workers()
         self.show()
+
+    def data_received( self, line:str):
+        process_data( self.data, line)
+        while len( self.data.time) > self.conf['buffer_size']: 
+            for var in self.data.vars: del var.vals[0]
+            del self.data.time[0]
 
 
     def init_workers( self):
@@ -22,7 +29,7 @@ class MainWindow( Qtw.QMainWindow, DataProc, Gui):
         self.worker_thread = QThread()
         self.serial_worker.moveToThread( self.worker_thread)
 
-        self.serial_worker.data_received.connect( self.process_data)
+        self.serial_worker.data_received.connect( self.data_received)
         self.worker_thread.started.connect(self.serial_worker.work)
         self.worker_thread.finished.connect(self.serial_worker.finish)
         self.start_button.clicked.connect( self.worker_start)
@@ -43,6 +50,8 @@ class MainWindow( Qtw.QMainWindow, DataProc, Gui):
         self.serial_worker.serial_port = self.port_dropdown.currentText()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
         self.worker_thread.start()
+        self.timer.timeout.connect( self.update_plot2)
+        self.timer.start( 25)
 
 
     def worker_stop( self):
@@ -55,6 +64,23 @@ class MainWindow( Qtw.QMainWindow, DataProc, Gui):
         self.baudrate_dropdown.setEnabled( True)
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         
+
+    def update_plot2( self):
+        try:
+            self.update_plot()
+        except:
+            print("Exception. Cleaning up...")
+            self.worker_stop()
+            lengths = [ len(var.vals) for var in self.data.vars]
+            lengths.append( len(self.data.time))
+            minl = min( lengths)
+            for var in self.data.vars:
+                while len(var.vals) >= minl:
+                    var.vals.pop()
+            while len(self.data.time) >= minl:
+                    self.data.time.pop()
+            self.worker_start()
+            print("Done\n")
 
     def update_plot( self):
         if not self.plot_data_items:
@@ -79,7 +105,6 @@ class MainWindow( Qtw.QMainWindow, DataProc, Gui):
         if self.autoscroll_chekbox.isChecked():
             if len( self.data.time) > self.x_range: #FIX data range vs pixels
                 self.plot_widget.setXRange( self.data.time[-1] - self.x_range, self.data.time[-1])
-        
         else:
             self.x_range = self.plot_widget.viewRect().width() #FIX move to event
 
