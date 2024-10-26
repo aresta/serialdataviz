@@ -32,25 +32,57 @@ class Gui:
         self.legend_checkbox.setEnabled( False)
         top_layout.addWidget( self.legend_checkbox)
         
-        self.cursors_checkbox = Qtw.QCheckBox("Cursors")
-        self.cursors_checkbox.setChecked( False)
-        self.cursors_checkbox.setEnabled( False)
-        top_layout.addWidget( self.cursors_checkbox)
+        # cursors
+        self.cursors_h_checkbox = Qtw.QCheckBox("Cursors H")
+        self.cursors_v_checkbox = Qtw.QCheckBox("Cursors V")
+        self.cursors_h_checkbox.setChecked( False)
+        self.cursors_h_checkbox.setEnabled( False)
+        self.cursors_v_checkbox.setChecked( False)
+        self.cursors_v_checkbox.setEnabled( False)
+        top_layout.addWidget( self.cursors_h_checkbox)
+        top_layout.addWidget( self.cursors_v_checkbox)
         cursor_pen = QPen( pg.mkColor("#EBB"))
         cursor_pen.setStyle( Qt.PenStyle.DotLine)
         cursor_pen.setWidth( 4)
         cursor_pen.setCosmetic( True)
-        cursor_penh = QPen( cursor_pen)
-        cursor_penh.setColor( pg.mkColor("#E88"))
-        print( "cursor_pen", cursor_pen)
-        self.cursors = pg.LinearRegionItem(
+        cursor_penhover = QPen( cursor_pen)
+        cursor_penhover.setColor( pg.mkColor("#E88"))
+        self.cursors_h = pg.LinearRegionItem(
+            orientation = 'horizontal',
             pen = cursor_pen,
-            hoverPen = cursor_penh,
+            hoverPen = cursor_penhover,
             brush = pg.mkBrush( pg.mkColor("#CCCCFF22")), 
             hoverBrush = pg.mkBrush( pg.mkColor("#CCCCFF55")))
-        self.cursors.setZValue(-10)
-        self.cursors.hide()
-
+        self.cursors_h.setZValue(-10)
+        self.cursors_v = pg.LinearRegionItem(
+            pen = cursor_pen,
+            hoverPen = cursor_penhover,
+            brush = pg.mkBrush( pg.mkColor("#CCCCFF22")), 
+            hoverBrush = pg.mkBrush( pg.mkColor("#CCCCFF55")))
+        self.cursors_v.setZValue(-10)
+        pg.InfLineLabel( 
+            self.cursors_v.lines[0],
+            text = 'x1={value:0.2f}', 
+            position=0.9, color="#C55",
+            movable=True)
+        self.lv2 = pg.InfLineLabel( 
+            self.cursors_v.lines[1],
+            text = 'x2={value:0.2f}', 
+            position=0.9, color="#C55",
+            movable=True)
+        pg.InfLineLabel( 
+            self.cursors_h.lines[0],
+            text = 'x1={value:0.2f}', 
+            position=0.9, color="#C55",
+            movable=True)
+        pg.InfLineLabel( 
+            self.cursors_h.lines[1],
+            text = 'x2={value:0.2f}', 
+            position=0.9, color="#C55",
+            movable=True)
+        self.cursors_h.hide()
+        self.cursors_v.hide()
+        
         top_layout.addStretch() # push elements to the sides
 
         self.settings_button = Qtw.QPushButton("Settings", icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_BrowserReload))
@@ -84,7 +116,8 @@ class Gui:
         # plot_data_items
         self.plot_data_items = []
 
-        self.plot_widget.addItem( self.cursors)
+        self.plot_widget.addItem( self.cursors_h)
+        self.plot_widget.addItem( self.cursors_v)
 
         # main layout    
         main_layout.addLayout( top_layout)

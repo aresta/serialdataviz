@@ -39,17 +39,27 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.autoscroll_chekbox.clicked.connect( 
             lambda: self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=(not self.autoscroll_chekbox.isChecked()), y=True))
         self.settings_button.clicked.connect( self.settings_button_clicked)
-        self.cursors_checkbox.clicked.connect( self.add_cursors) 
+        self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
+        self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
 
 
-    def add_cursors( self):
-        if self.cursors_checkbox.isChecked():
-            self.cursors.setRegion([ 
+    def add_cursors_h( self):
+        if self.cursors_h_checkbox.isChecked():
+            self.cursors_h.setRegion([ 
+                self.plot_widget.visibleRange().center().y() - self.plot_widget.visibleRange().height()/8,
+                self.plot_widget.visibleRange().center().y() + self.plot_widget.visibleRange().height()/8 ])
+            self.cursors_h.show()
+        else:
+            self.cursors_h.hide()
+
+    def add_cursors_v( self):
+        if self.cursors_v_checkbox.isChecked():
+            self.cursors_v.setRegion([ 
                 self.plot_widget.visibleRange().center().x() - self.plot_widget.visibleRange().width()/8,
                 self.plot_widget.visibleRange().center().x() + self.plot_widget.visibleRange().width()/8 ])
-            self.cursors.show()
+            self.cursors_v.show()
         else:
-            self.cursors.hide()
+            self.cursors_v.hide()
 
 
     def worker_start( self):
@@ -57,8 +67,12 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.start_button.setEnabled( False)
         self.port_dropdown.setEnabled( False)
         self.baudrate_dropdown.setEnabled( False)
-        self.cursors_checkbox.setChecked( False)
-        self.cursors_checkbox.setEnabled( False)
+        self.cursors_h_checkbox.setChecked( False)
+        self.cursors_h_checkbox.setEnabled( False)
+        self.cursors_v_checkbox.setChecked( False)
+        self.cursors_v_checkbox.setEnabled( False)
+        self.cursors_v.hide()
+        self.cursors_h.hide()
         self.serial_worker.baudrate = int( self.baudrate_dropdown.currentText())
         self.serial_worker.serial_port = self.port_dropdown.currentText()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
@@ -75,7 +89,10 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.start_button.setEnabled( True)
         self.port_dropdown.setEnabled( True)
         self.baudrate_dropdown.setEnabled( True)
-        self.cursors_checkbox.setEnabled( True)
+        self.cursors_h_checkbox.setEnabled( True)
+        self.cursors_h_checkbox.setEnabled( True)
+        self.cursors_v_checkbox.setEnabled( True)
+        self.cursors_v_checkbox.setEnabled( True)
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         self.timer.stop()
         
