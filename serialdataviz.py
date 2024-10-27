@@ -5,7 +5,6 @@ import os
 import sys
 from src.window import MainWindow
 
-
 conf = tomllib.load( open('serialdataviz.conf', mode='rb'))
 app = QApplication([])
 

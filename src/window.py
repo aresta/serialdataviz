@@ -42,24 +42,30 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
         self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
 
-
     def add_cursors_h( self):
+        if not hasattr( self, 'cursors_h'):
+            self.create_cursors()
         if self.cursors_h_checkbox.isChecked():
-            self.cursors_h.setRegion([ 
-                self.plot_widget.visibleRange().center().y() - self.plot_widget.visibleRange().height()/8,
-                self.plot_widget.visibleRange().center().y() + self.plot_widget.visibleRange().height()/8 ])
-            self.cursors_h.show()
+            self.cursors_h_set_region()
+            self.cursors_h_deltalabel.show()
+            self.cursors_deltalabels_update()
         else:
             self.cursors_h.hide()
+            self.cursors_h_deltalabel.hide()
 
     def add_cursors_v( self):
+        if not hasattr( self, 'cursors_v'):
+            self.create_cursors()
         if self.cursors_v_checkbox.isChecked():
-            self.cursors_v.setRegion([ 
-                self.plot_widget.visibleRange().center().x() - self.plot_widget.visibleRange().width()/8,
-                self.plot_widget.visibleRange().center().x() + self.plot_widget.visibleRange().width()/8 ])
-            self.cursors_v.show()
+            self.plot_widget.setYRange(         # workaround to avoid scale runaway
+                self.plot_widget.getPlotItem().viewRect().top()+10,
+                self.plot_widget.getPlotItem().viewRect().bottom()-10)
+            self.cursors_v_set_region()
+            self.cursors_v_deltalabel.show()
+            self.cursors_deltalabels_update()
         else:
             self.cursors_v.hide()
+            self.cursors_v_deltalabel.hide()
 
 
     def worker_start( self):
@@ -71,12 +77,19 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.cursors_h_checkbox.setEnabled( False)
         self.cursors_v_checkbox.setChecked( False)
         self.cursors_v_checkbox.setEnabled( False)
-        self.cursors_v.hide()
-        self.cursors_h.hide()
+        if hasattr( self, 'cursors_h'): 
+            self.cursors_h.hide()
+            self.cursors_h_deltalabel.hide()
+        if hasattr( self, 'cursors_v'): 
+            self.cursors_v.hide()
+            self.cursors_v_deltalabel.hide()
         self.serial_worker.baudrate = int( self.baudrate_dropdown.currentText())
         self.serial_worker.serial_port = self.port_dropdown.currentText()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
+        if self.data.vars:
+            self.x_range = self.plot_widget.viewRect().width()
         self.worker_thread.start()
+
         self.timer.timeout.connect( self.update_plot2)
         self.timer.start(25)
 
@@ -141,28 +154,6 @@ class MainWindow( Qtw.QMainWindow, Gui):
             self.x_range = self.plot_widget.viewRect().width() #FIX move to event
 
 
-    def settings_button_clicked( self):
-        dlg = Qtw.QDialog()
-        def settings_save():
-            if not self.data.vars: return
-            for var, checkbox in zip( self.data.vars, checkboxes):
-                var.is_visible = checkbox.isChecked()
-            dlg.accept()
-
-        dlg.setWindowTitle("Settings")
-        layout = Qtw.QVBoxLayout()
-        QBtn = Qtw.QDialogButtonBox.StandardButton.Save | Qtw.QDialogButtonBox.StandardButton.Cancel
-        buttonBox = Qtw.QDialogButtonBox( QBtn)
-        buttonBox.accepted.connect(settings_save)
-        buttonBox.rejected.connect(dlg.reject)
-        checkboxes:list[Qtw.QCheckBox] = []
-        for var in self.data.vars or []:
-            checkbox = Qtw.QCheckBox( var.name)
-            checkbox.setChecked( var.is_visible)
-            layout.addWidget( checkbox)
-            checkboxes.append( checkbox)
-        layout.addWidget( buttonBox)
-        dlg.setLayout( layout)
-        dlg.exec()
+        
 
 
