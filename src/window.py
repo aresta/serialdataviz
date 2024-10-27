@@ -36,11 +36,26 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.stop_button.clicked.connect( self.worker_stop)
         self.legend_checkbox.clicked.connect( 
             lambda: self.legend.show() if self.legend_checkbox.isChecked() else self.legend.hide())
-        self.autoscroll_chekbox.clicked.connect( 
-            lambda: self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=(not self.autoscroll_chekbox.isChecked()), y=True))
+        self.autoscroll_chekbox.clicked.connect( self.autoscroll_chekbox_clicked)
         self.settings_button.clicked.connect( self.settings_button_clicked)
         self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
         self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
+
+    def autoscroll_chekbox_clicked( self):
+        if self.autoscroll_chekbox.isChecked():
+            self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
+            self.cursors_h_checkbox.setChecked( False)
+            self.cursors_v_checkbox.setChecked( False)
+            self.cursors_h_checkbox.setEnabled( False)
+            self.cursors_v_checkbox.setEnabled( False)
+            self.cursors_h.hide()
+            self.cursors_h_deltalabel.hide()
+            self.cursors_v.hide()
+            self.cursors_v_deltalabel.hide()
+        else:
+            self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
+            self.cursors_h_checkbox.setEnabled( True)
+            self.cursors_v_checkbox.setEnabled( True)
 
     def add_cursors_h( self):
         if not hasattr( self, 'cursors_h'):
@@ -103,8 +118,6 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.port_dropdown.setEnabled( True)
         self.baudrate_dropdown.setEnabled( True)
         self.cursors_h_checkbox.setEnabled( True)
-        self.cursors_h_checkbox.setEnabled( True)
-        self.cursors_v_checkbox.setEnabled( True)
         self.cursors_v_checkbox.setEnabled( True)
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         self.timer.stop()
