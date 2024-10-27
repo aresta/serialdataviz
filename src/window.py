@@ -1,25 +1,31 @@
 import PyQt6.QtWidgets as Qtw
-from PyQt6.QtCore import Qt, QThread, QTimer
+from PyQt6.QtCore import QThread, QTimer
 import pyqtgraph as pg
-from src.data import Data, Var
-from src.gui import Gui
+from src import Gui, Cursors, Settings, Data, CONF
 from src.dataproc import process_data
 from src.serial_data_worker import Serial_data_worker
 
 
-class MainWindow( Qtw.QMainWindow, Gui):
-    def __init__(self, conf, *args, **kwargs):
+class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conf = conf
+        self.CONF = CONF
         self.data = Data()
         self.timer = QTimer( self)
         self.init_gui()
         self.init_workers()
         self.show()
 
+    def cleanup( self):
+        self.timer.stop()
+        self.serial_worker.running = False
+        self.worker_thread.quit()
+        self.worker_thread.wait()
+        
+
     def data_received( self, line:str):
         process_data( self.data, line)
-        while len( self.data.time) > self.conf['buffer_size']: 
+        while len( self.data.time) > CONF['buffer_size']: 
             for var in self.data.vars: del var.vals[0]
             del self.data.time[0]
 
@@ -37,7 +43,7 @@ class MainWindow( Qtw.QMainWindow, Gui):
         self.legend_checkbox.clicked.connect( 
             lambda: self.legend.show() if self.legend_checkbox.isChecked() else self.legend.hide())
         self.autoscroll_chekbox.clicked.connect( self.autoscroll_chekbox_clicked)
-        self.settings_button.clicked.connect( self.settings_button_clicked)
+        self.settings_button.clicked.connect( self.create_settings_dialog)
         self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
         self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
 
@@ -61,6 +67,12 @@ class MainWindow( Qtw.QMainWindow, Gui):
         if not hasattr( self, 'cursors_h'):
             self.create_cursors()
         if self.cursors_h_checkbox.isChecked():
+            # print( self.plot_widget.getPlotItem().viewRect().right())
+            # print( self.plot_widget.getPlotItem().viewRect().left())
+            # print( self.plot_widget.viewRect().left())
+            # self.plot_widget.setXRange(         # workaround to avoid scale runaway
+            #     self.plot_widget.getPlotItem().viewRect().right()+15,
+            #     self.plot_widget.getPlotItem().viewRect().left()-15)
             self.cursors_h_set_region()
             self.cursors_h_deltalabel.show()
             self.cursors_deltalabels_update()
@@ -73,8 +85,8 @@ class MainWindow( Qtw.QMainWindow, Gui):
             self.create_cursors()
         if self.cursors_v_checkbox.isChecked():
             self.plot_widget.setYRange(         # workaround to avoid scale runaway
-                self.plot_widget.getPlotItem().viewRect().top()+10,
-                self.plot_widget.getPlotItem().viewRect().bottom()-10)
+                self.plot_widget.viewRect().top()+10,
+                self.plot_widget.viewRect().bottom()-10)
             self.cursors_v_set_region()
             self.cursors_v_deltalabel.show()
             self.cursors_deltalabels_update()

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import pyqtgraph as pg
 from PyQt6.QtWidgets import QMainWindow, QComboBox, QPushButton, QCheckBox
 
 @dataclass
