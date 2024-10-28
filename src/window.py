@@ -38,12 +38,12 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.serial_worker.data_received.connect( self.data_received)
         self.worker_thread.started.connect(self.serial_worker.work)
         self.worker_thread.finished.connect(self.serial_worker.finish)
-        self.start_button.clicked.connect( self.worker_start)
-        self.stop_button.clicked.connect( self.worker_stop)
+        self.button_start.clicked.connect( self.worker_start)
+        self.button_pause.clicked.connect( self.worker_stop)
         self.legend_checkbox.clicked.connect( 
             lambda: self.legend.show() if self.legend_checkbox.isChecked() else self.legend.hide())
         self.autoscroll_chekbox.clicked.connect( self.autoscroll_chekbox_clicked)
-        self.settings_button.clicked.connect( self.create_settings_dialog)
+        self.button_settings.clicked.connect( self.create_settings_dialog)
         self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
         self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
 
@@ -54,25 +54,27 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.cursors_v_checkbox.setChecked( False)
             self.cursors_h_checkbox.setEnabled( False)
             self.cursors_v_checkbox.setEnabled( False)
-            self.cursors_h.hide()
-            self.cursors_h_deltalabel.hide()
-            self.cursors_v.hide()
-            self.cursors_v_deltalabel.hide()
+            if hasattr( self, 'cursors_h'):
+                self.cursors_h.hide()
+                self.cursors_h_deltalabel.hide()
+            if hasattr( self, 'cursors_v'):
+                self.cursors_v.hide()
+                self.cursors_v_deltalabel.hide()
         else:
             self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
             self.cursors_h_checkbox.setEnabled( True)
             self.cursors_v_checkbox.setEnabled( True)
+            self.plot_widget.setXRange( self.data.time[-5] - self.x_range, self.data.time[-5])
+            self.plot_widget.setYRange(         # workaround to avoid scale runaway
+                    self.plot_widget.viewRect().top()+5,
+                    self.plot_widget.viewRect().bottom()-5)
+            
+            
 
     def add_cursors_h( self):
         if not hasattr( self, 'cursors_h'):
             self.create_cursors()
         if self.cursors_h_checkbox.isChecked():
-            # print( self.plot_widget.getPlotItem().viewRect().right())
-            # print( self.plot_widget.getPlotItem().viewRect().left())
-            # print( self.plot_widget.viewRect().left())
-            # self.plot_widget.setXRange(         # workaround to avoid scale runaway
-            #     self.plot_widget.getPlotItem().viewRect().right()+15,
-            #     self.plot_widget.getPlotItem().viewRect().left()-15)
             self.cursors_h_set_region()
             self.cursors_h_deltalabel.show()
             self.cursors_deltalabels_update()
@@ -84,9 +86,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         if not hasattr( self, 'cursors_v'):
             self.create_cursors()
         if self.cursors_v_checkbox.isChecked():
-            self.plot_widget.setYRange(         # workaround to avoid scale runaway
-                self.plot_widget.viewRect().top()+10,
-                self.plot_widget.viewRect().bottom()-10)
             self.cursors_v_set_region()
             self.cursors_v_deltalabel.show()
             self.cursors_deltalabels_update()
@@ -96,8 +95,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
 
 
     def worker_start( self):
-        self.stop_button.setEnabled( True)
-        self.start_button.setEnabled( False)
+        self.button_pause.setEnabled( True)
+        self.button_start.setEnabled( False)
         self.port_dropdown.setEnabled( False)
         self.baudrate_dropdown.setEnabled( False)
         self.cursors_h_checkbox.setChecked( False)
@@ -125,14 +124,18 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.serial_worker.running = False
         self.worker_thread.quit()
         self.worker_thread.wait()
-        self.stop_button.setEnabled( False)
-        self.start_button.setEnabled( True)
+        self.button_pause.setEnabled( False)
+        self.button_start.setEnabled( True)
         self.port_dropdown.setEnabled( True)
         self.baudrate_dropdown.setEnabled( True)
         self.cursors_h_checkbox.setEnabled( True)
         self.cursors_v_checkbox.setEnabled( True)
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         self.timer.stop()
+        self.plot_widget.setXRange( self.data.time[-5] - self.x_range, self.data.time[-5])
+        self.plot_widget.setYRange(         # workaround to avoid scale runaway
+                self.plot_widget.viewRect().top()+5,
+                self.plot_widget.viewRect().bottom()-5)
         
 
     def update_plot2( self):
@@ -174,9 +177,11 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
                     data_item.setData( self.data.time, var.vals)
         if self.autoscroll_chekbox.isChecked():
             if len( self.data.time) > self.x_range: #FIX data range vs pixels
-                self.plot_widget.setXRange( self.data.time[-1] - self.x_range, self.data.time[-1])
+                self.plot_widget.setXRange( self.data.time[-5] - self.x_range, self.data.time[-5])
         else:
             self.x_range = self.plot_widget.viewRect().width() #FIX move to event
+
+            
 
 
         

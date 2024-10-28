@@ -86,9 +86,9 @@ class Cursors:
         self.cursors_v_deltalabel.setText( "△: {:.2f}".format( self.cursors_v.boundingRect().width()))
         if self.cursors_h_checkbox.isChecked():
             self.cursors_h_deltalabel.setPos( 
-                self.plot_widget.visibleRange().left(),
+                self.cursors_h.boundingRect().left(),
                 self.cursors_h.boundingRect().center().y())
         if self.cursors_v_checkbox.isChecked():
             self.cursors_v_deltalabel.setPos( 
                 self.cursors_v.boundingRect().center().x(),
-                self.plot_widget.visibleRange().bottom()-5)
+                self.cursors_v.boundingRect().bottom())

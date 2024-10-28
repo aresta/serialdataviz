@@ -15,11 +15,17 @@ class Gui():
 
         # top layout
         top_layout = Qtw.QHBoxLayout()
-        self.start_button = Qtw.QPushButton( icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_MediaPlay))
-        self.stop_button = Qtw.QPushButton( icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_MediaStop))
-        self.stop_button.setEnabled(False)
-        top_layout.addWidget( self.start_button)
-        top_layout.addWidget( self.stop_button)
+        self.button_start = Qtw.QPushButton( icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_MediaPlay))
+        self.button_pause = Qtw.QPushButton( icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_MediaPause))
+        self.button_reset = Qtw.QPushButton( icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_LineEditClearButton))
+        self.button_pause.setEnabled(False)
+        self.button_reset.setEnabled(False)
+        self.button_start.setToolTip("Start plotting")
+        self.button_pause.setToolTip("Pause plotting and data adquisition")
+        self.button_reset.setToolTip("Reset data and clean screen")
+        top_layout.addWidget( self.button_start)
+        top_layout.addWidget( self.button_pause)
+        top_layout.addWidget( self.button_reset)
 
         self.autoscroll_chekbox = Qtw.QCheckBox("Autoscroll")
         self.autoscroll_chekbox.setChecked( True)
@@ -31,17 +37,23 @@ class Gui():
         top_layout.addWidget( self.legend_checkbox)
 
         # cursors
-        self.cursors_h_checkbox = Qtw.QCheckBox("Cursors H")
-        self.cursors_v_checkbox = Qtw.QCheckBox("Cursors V")
+        cursors_gbox = Qtw.QGroupBox("Cursors")
+        cursors_layout = Qtw.QHBoxLayout()
+        self.cursors_h_checkbox = Qtw.QCheckBox("Horizontal")
+        self.cursors_v_checkbox = Qtw.QCheckBox("Vertical")
         self.cursors_h_checkbox.setChecked( False)
+        self.cursors_h_checkbox.setEnabled( False)
+        self.cursors_v_checkbox.setChecked( False)
         self.cursors_v_checkbox.setEnabled( False)
-        top_layout.addWidget( self.cursors_h_checkbox)
-        top_layout.addWidget( self.cursors_v_checkbox)
+        cursors_layout.addWidget( self.cursors_h_checkbox)
+        cursors_layout.addWidget( self.cursors_v_checkbox)
+        cursors_gbox.setLayout( cursors_layout)
+        top_layout.addWidget( cursors_gbox)
                
         top_layout.addStretch() # separator, push elements to the sides
 
-        self.settings_button = Qtw.QPushButton("Settings", icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_BrowserReload))
-        top_layout.addWidget( self.settings_button)
+        self.button_settings = Qtw.QPushButton("Settings", icon = self.style().standardIcon( Qtw.QStyle.StandardPixmap.SP_BrowserReload))
+        top_layout.addWidget( self.button_settings)
         
         # port & bauds
         self.port_dropdown = Qtw.QComboBox()
