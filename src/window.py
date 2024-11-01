@@ -40,6 +40,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.worker_thread.finished.connect(self.serial_worker.finish)
         self.button_start.clicked.connect( self.worker_start)
         self.button_pause.clicked.connect( self.worker_stop)
+        self.button_reset.clicked.connect( self.reset)
         self.legend_checkbox.clicked.connect( 
             lambda: self.legend.show() if self.legend_checkbox.isChecked() else self.legend.hide())
         self.autoscroll_chekbox.clicked.connect( self.autoscroll_chekbox_clicked)
@@ -96,6 +97,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
 
     def worker_start( self):
         self.button_pause.setEnabled( True)
+        self.button_reset.setEnabled( False)
         self.button_start.setEnabled( False)
         self.port_dropdown.setEnabled( False)
         self.baudrate_dropdown.setEnabled( False)
@@ -125,11 +127,18 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.worker_thread.quit()
         self.worker_thread.wait()
         self.button_pause.setEnabled( False)
+        self.button_reset.setEnabled( True)
         self.button_start.setEnabled( True)
         self.port_dropdown.setEnabled( True)
         self.baudrate_dropdown.setEnabled( True)
         self.cursors_h_checkbox.setEnabled( True)
         self.cursors_v_checkbox.setEnabled( True)
+        if hasattr( self, 'cursors_h'): 
+            self.cursors_h.hide()
+            self.cursors_h_deltalabel.hide()
+        if hasattr( self, 'cursors_v'): 
+            self.cursors_v.hide()
+            self.cursors_v_deltalabel.hide()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         self.timer.stop()
         self.plot_widget.setXRange( self.data.time[-5] - self.x_range, self.data.time[-5])
@@ -138,7 +147,35 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
                 self.plot_widget.viewRect().bottom()-5)
         
 
-    def update_plot2( self):
+    def reset( self):
+        for data_item in self.plot_data_items:
+            self.plot_widget.removeItem( data_item)
+        self.plot_data_items = []
+        self.data.vars = []
+        self.button_reset.setEnabled( False)
+        self.cursors_h_checkbox.setChecked( False)
+        self.cursors_h_checkbox.setEnabled( False)
+        self.cursors_v_checkbox.setChecked( False)
+        self.cursors_v_checkbox.setEnabled( False)
+        self.legend_checkbox.setEnabled( False)
+        self.legend_checkbox.setChecked( False)
+        self.legend.clear()
+        self.legend.hide()
+        self.autoscroll_chekbox.setEnabled( False)
+        self.autoscroll_chekbox.setChecked( False)
+        if hasattr( self, 'cursors_h'): 
+            self.cursors_h.hide()
+            self.cursors_h_deltalabel.hide()
+        if hasattr( self, 'cursors_v'): 
+            self.cursors_v.hide()
+            self.cursors_v_deltalabel.hide()
+        self.plot_widget.setXRange( 0, 1)
+        self.plot_widget.setYRange( 0, 1)
+        self.plot_widget.getPlotItem().getViewBox().enableAutoRange()
+        
+            
+
+    def update_plot2( self):    #FIX
         try:
             self.update_plot()
         except:
