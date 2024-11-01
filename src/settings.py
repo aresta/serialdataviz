@@ -1,19 +1,23 @@
 import PyQt6.QtWidgets as Qtw
+from src.data import Plot_Type
 
 class Settings:
     # settings dialog
     def create_settings_dialog( self):
         dlg = Qtw.QDialog()
         def settings_save():
-            if not self.data.vars: return
-            i=0
-            for var, checkbox in zip( self.data.vars, checkboxes):
-                if checkbox.isChecked() and not var.is_visible:
-                    self.plot_widget.addItem( self.plot_data_items[i])
-                elif not checkbox.isChecked() and var.is_visible:
-                    self.plot_widget.removeItem( self.plot_data_items[i])
-                var.is_visible = checkbox.isChecked()
-                i+=1
+            if self.data.vars:
+                i=0
+                for var, checkbox in zip( self.data.vars, checkboxes):
+                    if checkbox.isChecked() and not var.is_visible:
+                        self.plot_widget.addItem( self.plot_data_items[i])
+                    elif not checkbox.isChecked() and var.is_visible:
+                        self.plot_widget.removeItem( self.plot_data_items[i])
+                    var.is_visible = checkbox.isChecked()
+                    i+=1
+            if ts_button.isChecked(): self.data.plot_type = Plot_Type.TIME_SERIES
+            elif xy_button.isChecked(): self.data.plot_type = Plot_Type.XY
+            elif scatter_button.isChecked(): self.data.plot_type = Plot_Type.SCATTER
             dlg.accept()
 
         dlg.setWindowTitle("Settings")
@@ -41,10 +45,13 @@ class Settings:
         # plot type
         plot_type_layout = Qtw.QVBoxLayout()
         plot_type_gbox = Qtw.QGroupBox("Plot Type")
-        plot_type_layout.addWidget( r1 := Qtw.QRadioButton("Time series"))
-        plot_type_layout.addWidget( Qtw.QRadioButton("X/Y line"))
-        plot_type_layout.addWidget( Qtw.QRadioButton("Scatter plot"))
-        r1.setChecked( True)
+        plot_type_layout.addWidget( ts_button := Qtw.QRadioButton("Time series"))
+        plot_type_layout.addWidget( xy_button := Qtw.QRadioButton("X/Y line"))
+        plot_type_layout.addWidget( scatter_button := Qtw.QRadioButton("Scatter plot"))
+        if self.data.plot_type == Plot_Type.TIME_SERIES: ts_button.setChecked( True)
+        elif self.data.plot_type == Plot_Type.XY: xy_button.setChecked( True)
+        elif self.data.plot_type == Plot_Type.SCATTER: scatter_button.setChecked( True)
+
         plot_type_gbox.setLayout( plot_type_layout)
         main_layout.addWidget( plot_type_gbox)
 
