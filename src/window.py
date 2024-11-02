@@ -26,9 +26,12 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
 
     def data_received( self, line:str):
         process_data( self.data, line)
-        while len( self.data.vars[0].vals) > CONF['buffer_size']: 
-            for var in self.data.vars: del var.vals[0]
-            del self.data.time[0]
+        while len( self.data.vars[0].y) > CONF['buffer_size']: 
+            for var in self.data.vars: del var.y[0]
+            if self.data.plot_type == Plot_Type.TIME_SERIES:
+                del self.data.time[0]
+            elif self.data.plot_type in (Plot_Type.XY, Plot_Type.SCATTER):
+                for var in self.data.vars: del var.x[0]
 
 
     def init_workers( self):
@@ -137,6 +140,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.baudrate_dropdown.setEnabled( True)
         self.cursors_h_checkbox.setEnabled( True)
         self.cursors_v_checkbox.setEnabled( True)
+        self.cursors_h_checkbox.setChecked( False)
+        self.cursors_v_checkbox.setChecked( False)
         if hasattr( self, 'cursors_h'): 
             self.cursors_h.hide()
             self.cursors_h_deltalabel.hide()
@@ -188,12 +193,12 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             print("Exception: ", e)
             print("Cleaning up...")
             self.worker_stop()
-            lengths = [ len(var.vals) for var in self.data.vars]
+            lengths = [ len(var.y) for var in self.data.vars]
             lengths.append( len(self.data.time))
             minl = min( lengths)
             for var in self.data.vars:
-                while len(var.vals) >= minl:
-                    var.vals.pop()
+                while len(var.y) >= minl:
+                    var.y.pop()
             while len(self.data.time) >= minl:
                     self.data.time.pop()
             self.worker_start()
@@ -220,9 +225,9 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             for data_item, var in zip( self.plot_data_items, self.data.vars):
                 if var.is_visible:
                     if self.data.plot_type == Plot_Type.TIME_SERIES:
-                        data_item.setData( self.data.time, var.vals)
+                        data_item.setData( self.data.time, var.y)
                     elif self.data.plot_type == Plot_Type.XY:
-                        data_item.setData( *zip( *var.vals)) # unzip
+                        data_item.setData( var.x, var.y)
 
         if self.data.plot_type == Plot_Type.TIME_SERIES: 
             if self.autoscroll_chekbox.isChecked():

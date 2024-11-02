@@ -16,7 +16,8 @@ class Data_Format( Enum):
 @dataclass
 class Var:
     name: str = None
-    vals: list[float | tuple[ float, float]] = None
+    x: list[float] = None
+    y: list[float] = None
     is_visible: bool = True
 
 @dataclass
@@ -25,7 +26,6 @@ class Data:
     vars: list[Var] = None
     plot_type: Plot_Type = Plot_Type.TIME_SERIES
     data_format: Data_Format = Data_Format.PLAIN
-
 
 COLORS: list = []
 
