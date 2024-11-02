@@ -12,6 +12,8 @@ class Gui():
         self.setCentralWidget( central_widget)
         main_layout = Qtw.QVBoxLayout( central_widget)
         self.x_range = self.CONF['x_range']
+        self.show_h_grid = False
+        self.show_v_grid = False
 
         # top layout
         top_layout = Qtw.QHBoxLayout()

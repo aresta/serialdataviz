@@ -234,7 +234,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
                     elif self.data.plot_type == Plot_Type.SCATTER:
                         data_item.setData( var.x, var.y, 
                             symbol='o', symbolPen=var.color, symbolBrush=var.color, symbolSize=5, pen=None)
-
         if self.data.plot_type == Plot_Type.TIME_SERIES: 
             if self.autoscroll_chekbox.isChecked():
                 if len( self.data.time) > self.x_range: #FIX data range vs pixels

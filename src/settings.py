@@ -18,6 +18,11 @@ class Settings:
             if ts_button.isChecked(): self.data.plot_type = Plot_Type.TIME_SERIES
             elif xy_button.isChecked(): self.data.plot_type = Plot_Type.XY
             elif scatter_button.isChecked(): self.data.plot_type = Plot_Type.SCATTER
+
+            self.show_h_grid = h_grid.isChecked()
+            self.show_v_grid = v_grid.isChecked()
+            self.plot_widget.getPlotItem().showGrid( x = self.show_v_grid, y = self.show_h_grid)
+
             dlg.accept()
 
         dlg.setWindowTitle("Settings")
@@ -56,6 +61,18 @@ class Settings:
         main_layout.addWidget( plot_type_gbox)
 
         main_layout.addSpacing(10) # space
+
+        # show grids
+        show_grid_layout = Qtw.QVBoxLayout()
+        show_grid_gbox = Qtw.QGroupBox("Show grid")
+        show_grid_layout.addWidget( h_grid := Qtw.QCheckBox("Horizontal grid"))
+        show_grid_layout.addWidget( v_grid := Qtw.QCheckBox("Vertical grid"))
+        h_grid.setChecked( self.show_h_grid)
+        v_grid.setChecked( self.show_v_grid)
+        show_grid_gbox.setLayout( show_grid_layout)
+        main_layout.addWidget( show_grid_gbox)
+
+
 
         # sample rate
         sample_rate_layout = Qtw.QHBoxLayout()
