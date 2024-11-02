@@ -54,7 +54,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
 
     def autoscroll_chekbox_clicked( self):
         if self.autoscroll_chekbox.isChecked():
-            self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
+            if self.data.plot_type == Plot_Type.TIME_SERIES:
+                self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
             self.cursors_h_checkbox.setChecked( False)
             self.cursors_v_checkbox.setChecked( False)
             self.cursors_h_checkbox.setEnabled( False)
@@ -119,7 +120,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.cursors_v_deltalabel.hide()
         self.serial_worker.baudrate = int( self.baudrate_dropdown.currentText())
         self.serial_worker.serial_port = self.port_dropdown.currentText()
-        self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
+        if self.data.plot_type == Plot_Type.TIME_SERIES:
+            self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
         if self.data.vars:
             self.x_range = self.plot_widget.viewRect().width()
         self.worker_thread.start()
@@ -208,6 +210,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         if not self.data.vars: return # no data yet
         if not self.plot_data_items:
             for var, color in zip( self.data.vars, self.COLORS):
+                var.color = color
                 data_item = pg.PlotDataItem( pen = pg.mkPen( color = color, width = 2))
                 self.plot_widget.addItem( data_item)
                 self.plot_data_items.append( data_item)
@@ -228,6 +231,9 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
                         data_item.setData( self.data.time, var.y)
                     elif self.data.plot_type == Plot_Type.XY:
                         data_item.setData( var.x, var.y)
+                    elif self.data.plot_type == Plot_Type.SCATTER:
+                        data_item.setData( var.x, var.y, 
+                            symbol='o', symbolPen=var.color, symbolBrush=var.color, symbolSize=5, pen=None)
 
         if self.data.plot_type == Plot_Type.TIME_SERIES: 
             if self.autoscroll_chekbox.isChecked():

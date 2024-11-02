@@ -67,6 +67,8 @@ def process_data( data:Data, line:str):
         process_time_series( data, line)
     elif data.plot_type == Plot_Type.XY:
         process_xy( data, line)
+    elif data.plot_type == Plot_Type.SCATTER:
+        process_xy( data, line) # same line formats
     
     
 

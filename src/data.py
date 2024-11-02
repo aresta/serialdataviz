@@ -18,6 +18,7 @@ class Var:
     name: str = None
     x: list[float] = None
     y: list[float] = None
+    color: str = None
     is_visible: bool = True
 
 @dataclass
