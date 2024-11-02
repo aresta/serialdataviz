@@ -16,6 +16,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.init_gui()
         self.init_workers()
         self.show()
+        self.x_range = None
 
     def cleanup( self):
         self.timer.stop()
@@ -26,7 +27,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
 
     def data_received( self, line:str):
         process_data( self.data, line)
-        while len( self.data.vars[0].y) > CONF['buffer_size']: 
+        while self.data.vars and len( self.data.vars[0].y) > CONF['buffer_size']: 
             for var in self.data.vars: del var.y[0]
             if self.data.plot_type == Plot_Type.TIME_SERIES:
                 del self.data.time[0]
@@ -70,12 +71,13 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
             self.cursors_h_checkbox.setEnabled( True)
             self.cursors_v_checkbox.setEnabled( True)
+            offset = 0.1 * self.data.sample_rate
             self.plot_widget.setXRange( 
-                self.plot_widget.viewRect().left()-0.01,
-                self.plot_widget.viewRect().right()+0.01)
+                self.plot_widget.viewRect().left() - offset,
+                self.plot_widget.viewRect().right() + offset)
             self.plot_widget.setYRange(         # workaround to avoid scale runaway
-                self.plot_widget.viewRect().top()-0.01,
-                self.plot_widget.viewRect().bottom()+0.01)
+                self.plot_widget.viewRect().top() - offset,
+                self.plot_widget.viewRect().bottom() + offset)
             
             
 
@@ -122,8 +124,10 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.serial_worker.serial_port = self.port_dropdown.currentText()
         if self.data.plot_type == Plot_Type.TIME_SERIES:
             self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=False, y=True)
-        if self.data.vars:
-            self.x_range = self.plot_widget.viewRect().width()
+        if not self.x_range:
+            self.x_range = 100 * self.data.sample_rate
+        if self.data.plot_type == Plot_Type.TIME_SERIES and self.data.show_time:
+            self.plot_widget.getPlotItem().getAxis('bottom').setLabel( text = f"Time ({self.data.sample_rate_scale}seconds)")
         self.worker_thread.start()
 
         # self.timer.timeout.connect( self.update_plot2)
@@ -152,12 +156,13 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.cursors_v_deltalabel.hide()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
         self.timer.stop()
+        offset = 0.1 * self.data.sample_rate
         self.plot_widget.setXRange( 
-            self.plot_widget.viewRect().left()-0.01,
-            self.plot_widget.viewRect().right()+0.01)
+            self.plot_widget.viewRect().left() - offset,
+            self.plot_widget.viewRect().right() + offset)
         self.plot_widget.setYRange(         # workaround to avoid scale runaway
-            self.plot_widget.viewRect().top()-0.01,
-            self.plot_widget.viewRect().bottom()+0.01)
+            self.plot_widget.viewRect().top() - offset,
+            self.plot_widget.viewRect().bottom() + offset)
         
 
     def reset( self):
@@ -182,11 +187,11 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         if hasattr( self, 'cursors_v'): 
             self.cursors_v.hide()
             self.cursors_v_deltalabel.hide()
-        self.plot_widget.setXRange( 0, 1)
-        self.plot_widget.setYRange( 0, 1)
+        self.plot_widget.setXRange( 0, 100 * self.data.sample_rate)
+        self.plot_widget.setYRange( 0, 100 * self.data.sample_rate)
         self.plot_widget.getPlotItem().getViewBox().enableAutoRange()
-        
-            
+        self.plot_widget.getPlotItem().getAxis('bottom').setLabel( text=None, units=None)
+
 
     def update_plot2( self):    #FIX
         try:
@@ -236,7 +241,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
                             symbol='o', symbolPen=var.color, symbolBrush=var.color, symbolSize=5, pen=None)
         if self.data.plot_type == Plot_Type.TIME_SERIES: 
             if self.autoscroll_chekbox.isChecked():
-                if len( self.data.time) > self.x_range: #FIX data range vs pixels
+                if self.x_range and len( self.data.time) > 5 and self.data.time[-1] > self.x_range:
                     self.plot_widget.setXRange( self.data.time[-5] - self.x_range, self.data.time[-5])
             else:
                 self.x_range = self.plot_widget.viewRect().width() #FIX move to event

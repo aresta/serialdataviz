@@ -23,6 +23,24 @@ class Settings:
             self.show_v_grid = v_grid.isChecked()
             self.plot_widget.getPlotItem().showGrid( x = self.show_v_grid, y = self.show_h_grid)
 
+            if sample_rate_gbox.isChecked():
+                try:
+                    val = sample_rate.text().strip().replace('u','µ')
+                    if val[-1] in ('m','µ'):
+                        self.data.sample_rate = float( val[:-1])
+                        self.data.sample_rate_scale = val[-1]
+                    else:
+                        self.data.sample_rate = float( val)
+                        self.data.sample_rate_scale = ''
+                except Exception as e:
+                    print("Sample rate error:" , e, sample_rate.text())
+                self.x_range = self.data.sample_rate * 100
+                self.data.show_time = True
+            else:
+                self.data.show_time = False
+                self.data.sample_rate = 1
+                self.data.sample_rate_scale = ''
+
             dlg.accept()
 
         dlg.setWindowTitle("Settings")
@@ -59,6 +77,24 @@ class Settings:
 
         plot_type_gbox.setLayout( plot_type_layout)
         main_layout.addWidget( plot_type_gbox)
+        if self.plot_data_items:  # plot is active
+            plot_type_gbox.setEnabled( False) 
+
+        main_layout.addSpacing(10) # space
+
+        # sample rate
+        sample_rate_layout = Qtw.QHBoxLayout()
+        sample_rate_gbox = Qtw.QGroupBox("Sample Rate")
+        sample_rate_gbox.setCheckable( True)
+        sample_rate_gbox.setChecked( self.data.show_time)
+        sample_rate_layout.addWidget( Qtw.QLabel("Seconds per sample"))
+        sample_rate_layout.addWidget( sample_rate := Qtw.QLineEdit())
+        sample_rate.setMaximumWidth( 80)
+        sample_rate.setText( str( self.data.sample_rate) + self.data.sample_rate_scale) #TODO add units
+        sample_rate_layout.addStretch()
+        sample_rate_gbox.setLayout( sample_rate_layout)
+        main_layout.addWidget( sample_rate_gbox)
+        sample_rate_gbox.setEnabled( False if self.plot_data_items else True) 
 
         main_layout.addSpacing(10) # space
 
@@ -72,20 +108,6 @@ class Settings:
         show_grid_gbox.setLayout( show_grid_layout)
         main_layout.addWidget( show_grid_gbox)
 
-
-
-        # sample rate
-        sample_rate_layout = Qtw.QHBoxLayout()
-        sample_rate_gbox = Qtw.QGroupBox("Sample Rate")
-        sample_rate_gbox.setCheckable(True)
-        sample_rate_gbox.setChecked(False)
-        sample_rate_layout.addWidget( Qtw.QLabel("Seconds per sample"))
-        self.sample_rate = Qtw.QLineEdit()
-        self.sample_rate.setMaximumWidth(80)
-        sample_rate_layout.addWidget( self.sample_rate)
-        sample_rate_layout.addStretch()
-        sample_rate_gbox.setLayout( sample_rate_layout)
-        main_layout.addWidget( sample_rate_gbox)
 
         main_layout.addWidget( buttonBox)
         dlg.setLayout( main_layout)

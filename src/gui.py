@@ -11,7 +11,6 @@ class Gui():
         central_widget = Qtw.QWidget( self)
         self.setCentralWidget( central_widget)
         main_layout = Qtw.QVBoxLayout( central_widget)
-        self.x_range = self.CONF['x_range']
         self.show_h_grid = False
         self.show_v_grid = False
 
@@ -90,5 +89,15 @@ class Gui():
         main_layout.addLayout( top_layout)
         main_layout.addWidget( self.plot_widget)
 
+        # disable some right click menu options
+        menu_actions = self.plot_widget.getPlotItem().getViewBox().menu.actions()
+        for act in menu_actions:
+            if act.text() in ("Mouse Mode", "X axis", "Y axis"): 
+                act.setVisible( False)
+        self.plot_widget.getPlotItem().setContextMenuActionVisible( "Grid", False)
+        self.plot_widget.getPlotItem().setContextMenuActionVisible( "Points", False)
+        self.plot_widget.getPlotItem().setContextMenuActionVisible( "Alpha", False)
+        self.plot_widget.getPlotItem().setContextMenuActionVisible( "Downsample", False)
+        self.plot_widget.getPlotItem().setContextMenuActionVisible( "Average", False)
 
 

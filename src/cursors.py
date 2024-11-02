@@ -32,22 +32,22 @@ class Cursors:
         # cursor labels
         pg.InfLineLabel( 
             self.cursors_v.lines[0],
-            text = 'x1: {value:0.2f}', 
+            text = "x1: {value:0.2f}", 
             position=0.9, color = self.CONF['cursors']['label_color'],
             movable=True)
         pg.InfLineLabel( 
             self.cursors_v.lines[1],
-            text = 'x2: {value:0.2f}', 
+            text = "x2: {value:0.2f}", 
             position=0.87, color = self.CONF['cursors']['label_color'],
             movable=True)
         pg.InfLineLabel( 
             self.cursors_h.lines[1],
-            text = 'y1: {value:0.2f}', 
+            text = "y1: {value:0.2f}", 
             position=0.06, color = self.CONF['cursors']['label_color'],
             movable=True)
         pg.InfLineLabel( 
             self.cursors_h.lines[0],
-            text = 'y2: {value:0.2f}', 
+            text = "y2: {value:0.2f}", 
             position=0.05, color = self.CONF['cursors']['label_color'],
             movable=True)
         self.plot_widget.addItem( self.cursors_h)
@@ -82,8 +82,27 @@ class Cursors:
         self.cursors_deltalabels_update()
     
     def cursors_deltalabels_update( self):
+        delta_x = self.cursors_v.getRegion()[1] - self.cursors_v.getRegion()[0]
+        if self.data.show_time:
+            freq = 1/delta_x
+            if self.data.sample_rate_scale == 'm':
+                freq *= 1000 
+            elif self.data.sample_rate_scale == 'µ':
+                freq *= 1000000
+
+            if freq > 1000000: 
+                freqs = f" | Freq: {freq/1000000:.2f} MHz"
+            elif freq > 1000: 
+                freqs = f" | Freq: {freq/1000:.2f} KHz"
+            elif freq > 0.1:
+                freqs = f" | Freq: {freq:.2f} Hz"
+            else:
+                freqs = ''
+            delta_x_format = f"△: {delta_x:.2f} {self.data.sample_rate_scale}s{freqs}"
+        else:
+            delta_x_format = f"△: {delta_x:.2f}"
         self.cursors_h_deltalabel.setText( "△: {:.2f}".format( self.cursors_h.boundingRect().height()))
-        self.cursors_v_deltalabel.setText( "△: {:.2f}".format( self.cursors_v.boundingRect().width()))
+        self.cursors_v_deltalabel.setText( delta_x_format)
         if self.cursors_h_checkbox.isChecked():
             self.cursors_h_deltalabel.setPos( 
                 self.cursors_h.boundingRect().left(),

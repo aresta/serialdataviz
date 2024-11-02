@@ -29,7 +29,7 @@ def process_time_series( data:Data, line:str):
     else:
         for var, line_var in zip( data.vars, line_vars):
             var.y.append( line_var)
-        data.time.append( data.time[-1] + 1)
+        data.time.append( data.time[-1] + data.sample_rate)
 
 
 def process_xy( data:Data, line:str):
@@ -53,6 +53,8 @@ def process_xy( data:Data, line:str):
     except Exception as e:
         print("Error: ", e, line_vars)
         return
+    
+    if len( coords[0]) != 2: return # invalid format
 
     if not data.vars: 
         data.vars = [ Var( name=name, x=[coord[0]], y=[coord[1]]) for name,coord in zip( var_names, coords)]

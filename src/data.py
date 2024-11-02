@@ -27,6 +27,9 @@ class Data:
     vars: list[Var] = None
     plot_type: Plot_Type = Plot_Type.TIME_SERIES
     data_format: Data_Format = Data_Format.PLAIN
+    show_time: bool = False
+    sample_rate: float = 1 # time series sample rate
+    sample_rate_scale: str = '' # m=milli, µ=micro
 
 COLORS: list = []
 
