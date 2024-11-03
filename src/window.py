@@ -41,8 +41,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.serial_worker.moveToThread( self.worker_thread)
 
         self.serial_worker.data_received.connect( self.data_received)
-        self.worker_thread.started.connect(self.serial_worker.work)
-        self.worker_thread.finished.connect(self.serial_worker.finish)
+        self.worker_thread.started.connect( self.serial_worker.work)
+        self.worker_thread.finished.connect( self.serial_worker.finish)
         self.button_start.clicked.connect( self.worker_start)
         self.button_pause.clicked.connect( self.worker_stop)
         self.button_reset.clicked.connect( self.reset)
@@ -129,14 +129,14 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         if self.data.plot_type == Plot_Type.TIME_SERIES and self.data.show_time:
             self.plot_widget.getPlotItem().getAxis('bottom').setLabel( text = f"Time ({self.data.sample_rate_scale}seconds)")
         self.worker_thread.start()
-
         # self.timer.timeout.connect( self.update_plot2)
         self.timer.timeout.connect( self.update_plot)
-        self.timer.start(25)
+        self.timer.start(40)
 
 
     def worker_stop( self):
         self.serial_worker.running = False
+        self.timer.stop()
         self.worker_thread.quit()
         self.worker_thread.wait()
         self.button_pause.setEnabled( False)
@@ -155,7 +155,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.cursors_v.hide()
             self.cursors_v_deltalabel.hide()
         self.plot_widget.getPlotItem().getViewBox().setMouseEnabled( x=True, y=True)
-        self.timer.stop()
         offset = 0.1 * self.data.sample_rate
         self.plot_widget.setXRange( 
             self.plot_widget.viewRect().left() - offset,
@@ -163,6 +162,11 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.plot_widget.setYRange(         # workaround to avoid scale runaway
             self.plot_widget.viewRect().top() - offset,
             self.plot_widget.viewRect().bottom() + offset)
+        # check
+        tm = len( self.data.time)
+        for var in self.data.vars:
+            if len( var.y) != tm:
+                print("ERROR arrays len: ", tm, len( var.y), var.name)
         
 
     def reset( self):
@@ -170,6 +174,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.plot_widget.removeItem( data_item)
         self.plot_data_items = []
         self.data.vars = []
+        self.data.time = []
         self.button_reset.setEnabled( False)
         self.cursors_h_checkbox.setChecked( False)
         self.cursors_h_checkbox.setEnabled( False)
@@ -197,9 +202,10 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         try:
             self.update_plot()
         except Exception as e:
+            self.timer.stop()
+            self.worker_stop()
             print("Exception: ", e)
             print("Cleaning up...")
-            self.worker_stop()
             lengths = [ len(var.y) for var in self.data.vars]
             lengths.append( len(self.data.time))
             minl = min( lengths)
@@ -209,6 +215,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             while len(self.data.time) >= minl:
                     self.data.time.pop()
             self.worker_start()
+            self.timer.start()
             print("Done\n")
 
     def update_plot( self):
@@ -231,7 +238,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.autoscroll_chekbox.setEnabled( True)
         else:
             for data_item, var in zip( self.plot_data_items, self.data.vars):
-                if var.is_visible:
                     if self.data.plot_type == Plot_Type.TIME_SERIES:
                         data_item.setData( self.data.time, var.y)
                     elif self.data.plot_type == Plot_Type.XY:

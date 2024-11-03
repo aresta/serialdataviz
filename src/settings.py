@@ -34,6 +34,13 @@ class Settings:
                         self.data.sample_rate_scale = ''
                 except Exception as e:
                     print("Sample rate error:" , e, sample_rate.text())
+                # adjust scaling
+                if self.data.sample_rate_scale == 'µ' and self.data.sample_rate >= 10:
+                    self.data.sample_rate /= 1000 
+                    self.data.sample_rate_scale = 'm'
+                elif self.data.sample_rate_scale == 'm' and self.data.sample_rate >= 10:
+                    self.data.sample_rate /= 1000 
+                    self.data.sample_rate_scale = ''
                 self.x_range = self.data.sample_rate * 100
                 self.data.show_time = True
             else:

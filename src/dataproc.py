@@ -20,11 +20,15 @@ def process_time_series( data:Data, line:str):
             line_vars = [ v.split(':')[1] for v in line_vars]
         line_vars = [ float(v) for v in line_vars]
     except Exception as e:
-        print("Error: ", e, line_vars)
+        print("Error pst: ", e, line_vars, line)
+        return
+    
+    if data.vars and len( line_vars) != len(data.vars):
+        print("ERROR pts. Missing vars in line", line_vars)
         return
 
-    if not data.vars: 
-        data.vars = [ Var(name=var[0], y=[var[1]]) for var in zip( var_names, line_vars)]
+    if not data.vars:
+        data.vars = [ Var(name=var_name, y=[var_val]) for (var_name, var_val) in zip( var_names, line_vars)]
         data.time = [0]
     else:
         for var, line_var in zip( data.vars, line_vars):
@@ -51,7 +55,7 @@ def process_xy( data:Data, line:str):
         coords = [ v.split(',') for v in line_vars]
         coords = [ (float(x), float(y)) for x,y in coords]
     except Exception as e:
-        print("Error: ", e, line_vars)
+        print("Error pxy: ", e, line_vars)
         return
     
     if len( coords[0]) != 2: return # invalid format

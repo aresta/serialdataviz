@@ -70,6 +70,7 @@ class Gui():
         top_layout.addSpacing(35)
         top_layout.addWidget( Qtw.QLabel("Baud rate"))
         top_layout.addWidget( self.baudrate_dropdown)
+        self.baudrate_dropdown.setCurrentText('115200')
 
         # plot
         self.plot_widget = pg.PlotWidget()
