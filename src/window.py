@@ -131,7 +131,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.worker_thread.start()
         # self.timer.timeout.connect( self.update_plot2)
         self.timer.timeout.connect( self.update_plot)
-        self.timer.start(40)
+        self.timer.start(25)
 
 
     def worker_stop( self):
@@ -162,11 +162,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.plot_widget.setYRange(         # workaround to avoid scale runaway
             self.plot_widget.viewRect().top() - offset,
             self.plot_widget.viewRect().bottom() + offset)
-        # check
-        tm = len( self.data.time)
-        for var in self.data.vars:
-            if len( var.y) != tm:
-                print("ERROR arrays len: ", tm, len( var.y), var.name)
         
 
     def reset( self):
@@ -238,6 +233,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.autoscroll_chekbox.setEnabled( True)
         else:
             for data_item, var in zip( self.plot_data_items, self.data.vars):
+                if var.is_visible:
                     if self.data.plot_type == Plot_Type.TIME_SERIES:
                         data_item.setData( self.data.time, var.y)
                     elif self.data.plot_type == Plot_Type.XY:

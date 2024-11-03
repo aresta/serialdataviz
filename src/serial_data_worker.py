@@ -19,10 +19,6 @@ class Serial_data_worker( QObject):
             self.serial = serial.Serial(self.serial_port, self.baudrate, timeout=2)
             self.running = True
             self.serial.reset_input_buffer()
-
-            if self.serial.in_waiting > 0: # discard first line, maybe incomplete
-                str = self.serial.read_until( size=128)
-
             while self.running:
                 if self.serial.in_waiting > 0:
                     str = self.serial.read_until( size=128)
