@@ -9,7 +9,7 @@ Data can be just numbers separated by comas or spaces, or named variables.
 Python >= 3.8   (I believe, not tested)
 
 ## Installation
-#### Clon the github repository
+#### Clone the github repository
 ```
 git clone https://github.com/aresta/serialdataviz
 cd serialdataviz
@@ -28,6 +28,33 @@ pip install -r requirements.txt
 ```
 py serialdataviz.py
 ```
+
+## Serial Data formats
+You should send the values in the serial port with one of the next formats, depending the plot type and if you want to name the variables.
+
+The plot type can be selected in the configuration dialog of the application.
+### Time series
+- One number per line
+- Several numbers per lines, separated by comas or spaces. Each number will get a default variable name: Var1, Var2...
+- Several pairs, separated by comas or spaces:  
+```
+<var_name>:number
+```
+
+### XY plot and Scatter plot
+- Two numbers per line (x,y), separated by comas or spaces
+- Several pairs, separated by semicolons. Each pair will get a default variable name: Var1, Var2...
+```
+number,number;
+```
+- Several structures of var names and values , separated by semicolons:
+```
+<var_name>:number,number;
+```
+
+Take into account that the variable names and the data structure will be parsed only in the first valid line received.  The application expects that all lines will have the same structure, so you can't change the order of the variables afterwards.
+
+
 
 
 ## License
