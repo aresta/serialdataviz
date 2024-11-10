@@ -59,11 +59,11 @@ class Gui():
         # port & bauds
         self.port_dropdown = Qtw.QComboBox()
         ports = [ port.device for port in serial.tools.list_ports.comports()] #FIX: refresh ports: port monitor worker
-        port_index = next((x for x in ports if 'usb' in x)) #FIX dirty debug trick
+        port_index = next((x for x in ports if 'usb' in x)) #FIX dirty temp trick to autoselect the port
         self.port_dropdown.addItems( ports)
         top_layout.addWidget( Qtw.QLabel("Serial Ports"))
         top_layout.addWidget( self.port_dropdown)
-        self.port_dropdown.setCurrentText(port_index)    #FIX  dirty debug trick
+        self.port_dropdown.setCurrentText(port_index)    #FIX  dirty temp trick
         self.baudrate_dropdown = Qtw.QComboBox()
         self.baudrate_dropdown.addItems( self.CONF['bauds'])
         self.baudrate_dropdown.setCurrentText("9600")

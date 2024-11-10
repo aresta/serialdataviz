@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 
-
+# constants
 class Plot_Type( Enum):
     TIME_SERIES = auto()
     XY          = auto()
@@ -13,6 +13,7 @@ class Data_Format( Enum):
     PLAIN       = auto()
     VAR_NAMES   = auto()
 
+
 @dataclass
 class Var:
     name: str = None
@@ -20,6 +21,7 @@ class Var:
     y: list[float] = None
     color: str = None
     is_visible: bool = True
+
 
 @dataclass
 class Data:

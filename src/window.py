@@ -53,6 +53,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.cursors_h_checkbox.clicked.connect( self.add_cursors_h) 
         self.cursors_v_checkbox.clicked.connect( self.add_cursors_v) 
 
+
     def autoscroll_chekbox_clicked( self):
         if self.autoscroll_chekbox.isChecked():
             if self.data.plot_type == Plot_Type.TIME_SERIES:
@@ -78,8 +79,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
             self.plot_widget.setYRange(         # workaround to avoid scale runaway
                 self.plot_widget.viewRect().top() - offset,
                 self.plot_widget.viewRect().bottom() + offset)
-            
-            
+
 
     def add_cursors_h( self):
         if not hasattr( self, 'cursors_h'):
@@ -91,6 +91,7 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         else:
             self.cursors_h.hide()
             self.cursors_h_deltalabel.hide()
+
 
     def add_cursors_v( self):
         if not hasattr( self, 'cursors_v'):
@@ -129,7 +130,6 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         if self.data.plot_type == Plot_Type.TIME_SERIES and self.data.show_time:
             self.plot_widget.getPlotItem().getAxis('bottom').setLabel( text = f"Time ({self.data.sample_rate_scale}seconds)")
         self.worker_thread.start()
-        # self.timer.timeout.connect( self.update_plot2)
         self.timer.timeout.connect( self.update_plot)
         self.timer.start(25)
 
@@ -165,6 +165,8 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         
 
     def reset( self):
+        '''Removes all plots and stored data
+        '''
         for data_item in self.plot_data_items:
             self.plot_widget.removeItem( data_item)
         self.plot_data_items = []
@@ -193,27 +195,9 @@ class MainWindow( Qtw.QMainWindow, Gui, Cursors, Settings):
         self.plot_widget.getPlotItem().getAxis('bottom').setLabel( text=None, units=None)
 
 
-    def update_plot2( self):    #FIX
-        try:
-            self.update_plot()
-        except Exception as e:
-            self.timer.stop()
-            self.worker_stop()
-            print("Exception: ", e)
-            print("Cleaning up...")
-            lengths = [ len(var.y) for var in self.data.vars]
-            lengths.append( len(self.data.time))
-            minl = min( lengths)
-            for var in self.data.vars:
-                while len(var.y) >= minl:
-                    var.y.pop()
-            while len(self.data.time) >= minl:
-                    self.data.time.pop()
-            self.worker_start()
-            self.timer.start()
-            print("Done\n")
-
     def update_plot( self):
+        '''Refresh the plot in screen. It's called by the timer at regular intervals.
+        '''
         if not self.data.vars: return # no data yet
         if not self.plot_data_items:
             for var, color in zip( self.data.vars, self.COLORS):

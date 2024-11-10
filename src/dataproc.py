@@ -2,6 +2,8 @@ from src.data import Data, Var, Data_Format, Plot_Type
 
 
 def process_time_series( data:Data, line:str):
+    '''Process an input line a time series plot data
+    '''
     if ',' in line:
         line_vars = line.split(',')
     elif ' ' in line:
@@ -37,6 +39,8 @@ def process_time_series( data:Data, line:str):
 
 
 def process_xy( data:Data, line:str):
+    '''Process an input line a XY plot data
+    '''
     if ';' in line:
         line_vars = line.split(';')
     else: 
@@ -68,6 +72,8 @@ def process_xy( data:Data, line:str):
             var.y.append( coord[1])
 
 def process_data( data:Data, line:str):
+    '''Process an input line and updates the data structures 
+    '''
     line = line.strip()
     if data.plot_type == Plot_Type.TIME_SERIES:
         process_time_series( data, line)
