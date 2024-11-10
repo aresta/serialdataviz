@@ -1,6 +1,7 @@
 import pyqtgraph as pg
 from PyQt6 import QtCore
 
+# To fix what seems a bug in the library class
 class LinearRegionItemFix( pg.LinearRegionItem):
 
     def mouseDragEvent(self, ev):
