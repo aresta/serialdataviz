@@ -51,17 +51,17 @@ The plot type can be selected in the configuration dialog of the application.
 24.95,83.35,-41.07
 24.42,85.13,-78.28
 ```
-- Several data pairs, separated by comas or spaces:  
+- Several groups, separated by comas or spaces:  
 ```
 <var_name>:number
 ```
 ```
-Signal_A:10.58,Singnal_B:70.67,Another:-6.27
-Signal_A:13.84,Singnal_B:72.12,Another:36.46
-Signal_A:16.80,Singnal_B:73.60,Another:72.71
-Signal_A:24.91,Singnal_B:81.62,Another:4.77
-Signal_A:24.95,Singnal_B:83.35,Another:-41.07
-Signal_A:24.42,Singnal_B:85.13,Another:-78.28
+Signal_A:10.58,Signal_B:70.67,Another:-6.27
+Signal_A:13.84,Signal_B:72.12,Another:36.46
+Signal_A:16.80,Signal_B:73.60,Another:72.71
+Signal_A:24.91,Signal_B:81.62,Another:4.77
+Signal_A:24.95,Signal_B:83.35,Another:-41.07
+Signal_A:24.42,Signal_B:85.13,Another:-78.28
 ```
 ![Serial Data Plotter](img/serialdataviz1.jpg) 
 
@@ -75,6 +75,16 @@ number,number;
 ```
 <var_name>:number,number;
 ```
+
+```
+Test:-9.27,-9.65;Another one:0.59,4.94
+Test:-9.73,-9.33;Another one:-0.66,4.39
+Test:-9.96,-8.93;Another one:-1.86,3.30
+Test:-9.98,-8.44;Another one:-2.95,1.82
+Test:-9.77,-7.86;Another one:-3.86,0.11
+Test:-9.34,-7.20;Another one:-4.53,-1.61
+```
+
 ![Serial Data Plotter](img/XY.gif) 
 
 Take into account that the variable names and the data structure will be parsed only from the first valid line received.  The application expects that all lines will have the same structure, so you shouldn't change the order of the variables on the fly.
