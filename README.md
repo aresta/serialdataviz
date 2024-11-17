@@ -17,8 +17,8 @@ cd serialdataviz
 ```
 #### Install a Python virtual environment (Optional)
 ```
-python -m venv 
-. activate
+python -m venv venv
+source venv/bin/activate
 ```
 #### Install dependencies
 ```
